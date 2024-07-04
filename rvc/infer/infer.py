@@ -183,7 +183,73 @@ def get_vc(weight_root, sid):
     vc = VC(tgt_sr, config)
     n_spk = cpt["config"][-3]
 
-# The infer_pipeline function remains largely unchanged as it mostly calls other functions
-# and doesn't involve direct PyTorch operations
+def infer_pipeline(
+    f0up_key,
+    filter_radius,
+    index_rate,
+    rms_mix_rate,
+    protect,
+    hop_length,
+    f0method,
+    audio_input_path,
+    audio_output_path,
+    model_path,
+    index_path,
+    split_audio,
+    f0autotune,
+    clean_audio,
+    clean_strength,
+    export_format,
+    embedder_model,
+    embedder_model_custom,
+    upscale_audio,
+):
+    global tgt_sr, net_g, vc, cpt
 
-# Main execution and argument parsing remain unchanged
+    get_vc(model_path, 0)
+
+    try:
+
+        if upscale_audio == "True":
+            upscale(audio_input_path, audio_input_path)
+
+        start_time = time.time()
+        voice_conversion(
+            sid=0,
+            input_audio_path=audio_input_path,
+            f0_up_key=f0up_key,
+            f0_file=None,
+            f0_method=f0method,
+            file_index=index_path,
+            index_rate=float(index_rate),
+            rms_mix_rate=float(rms_mix_rate),
+            protect=float(protect),
+            hop_length=hop_length,
+            output_path=audio_output_path,
+            split_audio=split_audio,
+            f0autotune=f0autotune,
+            filter_radius=filter_radius,
+            embedder_model=embedder_model,
+            embedder_model_custom=embedder_model_custom,
+        )
+
+        if clean_audio == "True":
+            cleaned_audio = remove_audio_noise(audio_output_path, clean_strength)
+            if cleaned_audio is not None:
+                sf.write(audio_output_path, cleaned_audio, tgt_sr, format="WAV")
+
+        output_path_format = audio_output_path.replace(
+            ".wav", f".{export_format.lower()}"
+        )
+        audio_output_path = convert_audio_format(
+            audio_output_path, output_path_format, export_format
+        )
+
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(
+            f"Conversion completed. Output file: '{audio_output_path}' in {elapsed_time:.2f} seconds."
+        )
+
+    except Exception as error:
+        print(f"Voice conversion failed: {error}")
