@@ -1,0 +1,14 @@
+annoy==1.17.3
+audio_upscaler==0.1.4
+fairseq==0.12.2
+ffmpeg==1.4
+librosa==0.9.2
+mlx==0.15.2
+noisereduce==3.0.2
+numpy==1.23.5
+parselmouth==1.1.1
+pyworld==0.3.4
+scipy==1.14.0
+soundfile==0.12.1
+tqdm==4.66.4
+wget==3.2
